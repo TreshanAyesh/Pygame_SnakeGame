@@ -8,20 +8,26 @@ BACKGROUND_COLOR = (61, 148, 51)
 
 class Apple:
     def __init__(self, parent_screen):
+
         self.apple = pygame.image.load("resources/apple.jpg").convert()
         self.parent_screen = parent_screen
         self.x = size * 10
         self.y = size * 10
+
     def draw(self):
+
         self.parent_screen.blit(self.apple, (self.x, self.y))  # drawing block on surface
         pygame.display.flip()  # updating pygame screen
 
     def move(self):
-        self.x = random.randint(0,24) * size  #random x value less than 1000
-        self.y = random.randint(0,14) * size
+
+        self.x = random.randint(1,23) * size  #random x value less than 1000
+        self.y = random.randint(1,13) * size
+
 
 
 class Snake:
+
     def __init__(self, parent_screen, length):
         self.length = length
         self.parent_screen = parent_screen
@@ -31,32 +37,38 @@ class Snake:
         self.direction = "down"
 
     def increase_length(self):
+
         self.length += 1
         self.x.append(-1)
         self.y.append(-1)
 
     def draw(self):
+
         #self.parent_screen.fill((61, 148,51))  # RGB values for background color (this method is needed to clear all the previous blocks in screen)
         for i in range(self.length):
             self.parent_screen.blit(self.block, (self.x[i], self.y[i]))  # drawing block on surface
         pygame.display.flip()  # updating pygame screen
 
     def move_left(self):
+
         self.direction = 'left'  #now we have a walk method,it takes care of cordinates
         #self.x -= 10
         #self.draw()
 
     def move_right(self):
+
         self.direction = 'right'
         #self.x += 10
         #self.draw()
 
     def move_up(self):
+
         self.direction = 'up'
         #self.y -= 10
         #self.draw()
 
     def move_down(self):
+
         self.direction = 'down'
         #self.y += 10
         #self.draw()
@@ -79,48 +91,73 @@ class Snake:
         self.draw()
 
 class Game:
+
     def __init__(self):
+
         pygame.init()  # initializes pygame
         pygame.display.set_caption("Snake Game by Treshan Ayesh")
 
         pygame.mixer.init()
-        self.play_bg_music()
+        self.play_bg_music()   #strat background music
 
         self.surface = pygame.display.set_mode((1000, 600))  # display area for our game
         self.render_bg()  # RGB values for background color
+        self.draw_wall()
         self.snake = Snake(self.surface,1)  #snake inside game class
         self.snake.draw() #draw the snake
         self.apple = Apple(self.surface) #initializing apple
         self.apple.draw()
 
+
+
+
+
     def is_collision(self,x1,y1,x2,y2):
+
         if x1 >= x2 and x1 < x2 + size:
             if y1 >= y2 and y1 < y2 + size:
                 return True
         return False
 
     def reset(self):
+
         self.snake = Snake(self.surface, 1)  # snake inside game class
         self.apple = Apple(self.surface)  # initializing apple
 
     def play_bg_music(self):
+
         pygame.mixer.music.load("resources/bg_music_1.mp3")
         pygame.mixer.music.play()
 
 
     def play_sound(self, sound):
+
         sound = pygame.mixer.Sound(f"resources/{sound}.mp3")
         pygame.mixer.Sound.play(sound)
 
     def render_bg(self):
+
         bg = pygame.image.load("resources/background.jpg").convert()
         self.surface.blit(bg, (0,0))
 
+    def draw_wall(self):
+        wall = self.wall = pygame.image.load("resources/wall.jpg").convert()
+        for i in range(0, 1000, 40):
+            self.surface.blit(self.wall, (i,0))
+            self.surface.blit(self.wall, (i, 560))
+        for i in range(0, 600, 40):
+            self.surface.blit(self.wall, (0,i))
+            self.surface.blit(self.wall, (960, i))
+
+
     def play(self):
+
         self.render_bg()
+        self.draw_wall()
         self.snake.walk()
         self.apple.draw()  # needed because walk method clears the screen
         self.display_score()
+
         pygame.display.flip()
 
         #snake colliding with apple
@@ -136,8 +173,19 @@ class Game:
                 self.play_sound("crash")
                 raise "Game Over"
 
+        #snake colliding with wall
+        for i in range(0,1000):
+            if self.is_collision(self.snake.x[0], self.snake.y[0], i,0) or self.is_collision(self.snake.x[0], self.snake.y[0], i,560):
+                self.play_sound("crash")
+                raise "Game Over"
+        for i in range(0,600):
+            if self.is_collision(self.snake.x[0], self.snake.y[0], 0,i) or self.is_collision(self.snake.x[0], self.snake.y[0], 960,i):
+                self.play_sound("crash")
+                raise "Game Over"
+
 
     def show_game_over(self):
+
         self.render_bg()
         font = pygame.font.SysFont('arial', 30)
         line1 = font.render(f"Game is Over! Your score is {self.snake.length}",True,(200,200,200))
@@ -150,6 +198,7 @@ class Game:
 
 
     def display_score(self):
+
         font = pygame.font.SysFont('arial',30)
         score = font.render(f"Score: {self.snake.length}",True,(200,200,200))
         self.surface.blit(score, (800,10))
@@ -157,6 +206,7 @@ class Game:
 
 
     def run(self):
+
         # event loop
         running = True
         pause = False
